@@ -128,7 +128,7 @@ class OrderSerializer(serializers.ModelSerializer):
         with transaction.atomic():
             tickets_data = validated_data.pop("tickets")
             order = Order.objects.create(
-                user=self.context['request'].user,
+                user=self.context["request"].user,
                 **validated_data
             )
             for ticket_data in tickets_data:
