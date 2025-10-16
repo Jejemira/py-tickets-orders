@@ -115,13 +115,9 @@ class TicketSerializer(serializers.ModelSerializer):
         model = Ticket
         fields = ("id", "row", "seat", "movie_session")
 
-    def validate(self, attrs):
-        ...
-
 
 class OrderSerializer(serializers.ModelSerializer):
     tickets = TicketSerializer(many=True,
-                               read_only=True,
                                allow_null=False)
 
     class Meta:
@@ -131,7 +127,10 @@ class OrderSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         with transaction.atomic():
             tickets_data = validated_data.pop("tickets")
-            order = Order.objects.create(**validated_data)
+            order = Order.objects.create(
+                user=self.context['request'].user,
+                **validated_data
+            )
             for ticket_data in tickets_data:
                 Ticket.objects.create(order=order, **ticket_data)
             return order
